@@ -1,0 +1,32 @@
+<?php
+    // Đường dẫn tới thư mục chưa folder artisan;
+    $pathParent = './vendors';
+
+    if(count($argv) <= 1) {
+        include $pathParent.'/artisan/help.php';
+        die();
+    }
+
+    require($pathParent.'/artisan/Make.php');
+    use Artisan\Make;
+
+    $attributes = $argv[1];
+    if (isset($argv[2])) {
+        $data = $argv[2];
+    } else {
+        echo 'Lỗi cú pháp, vui lòng thử lại';
+        die();
+    }
+
+    $attributes = explode(':', $attributes);
+    $key = $attributes[0];
+    $type = $attributes[1];
+
+    switch ($key) {
+        case 'make': {
+            $make = new Make($data,$pathParent);
+            $make->handle($type);
+            break;
+        }
+    }
+?>
