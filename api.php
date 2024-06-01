@@ -65,6 +65,13 @@ Route::add(root_base . '/api/suppliers/amounts/([0-9]*)', function () {
     include 'api/suppliers/supplier-amounts.php';
 }, ['GET', 'PUT']);
 
+// Quản lý vật tư
+Route::add(root_base . '/api/vattu', function () {
+    include 'api/vattu/vattu.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/vattu/([0-9]*)', function () {
+    include 'api/vattu/vattu1.php';
+}, ['GET', 'PUT']);
 
 // Quản lý khách hàng
 Route::add(root_base . '/api/customers', function () {
@@ -73,6 +80,52 @@ Route::add(root_base . '/api/customers', function () {
 Route::add(root_base . '/api/customers/([0-9]*)', function () {
     include 'api/customers/customer.php';
 }, ['GET', 'PUT']);
+
+Route::add(root_base . '/api/quotes/([0-9]*)', function () {
+    include 'api/customers/quotes.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/quote/([0-9]*)', function () {
+    include 'api/customers/quote.php';
+}, ['GET', 'PUT']);
+
+Route::add(root_base . '/api/quote_details/([0-9]*)', function () {
+    include 'api/customers/quote_details.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/quote_detail/([0-9]*)', function () {
+    include 'api/customers/quote_detail.php';
+}, ['GET', 'PUT', 'DELETE']);
+
+
+
+
+// Quản lý sản phẩm và dịch vụ
+Route::add(root_base . '/api/products', function () {
+    include 'api/products/products.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/products/([0-9]*)', function () {
+    include 'api/products/product.php';
+}, ['GET', 'PUT']);
+
+
+
+// Quản lý vật tư
+Route::add(root_base . '/api/loaivattu', function () {
+    include 'api/vattu/loaivattu.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/loaivattu/([0-9]*)', function () {
+    include 'api/vattu/loaivattu1.php';
+}, ['GET', 'PUT']);
+
+// Quản lý đơn vị tính
+Route::add(root_base . '/api/units', function () {
+    include 'api/units/units.php';
+}, ['GET', 'PUT']);
+Route::add(root_base . '/api/units/([0-9]*)', function () {
+    include 'api/units/unit.php';
+}, ['GET', 'PUT']);
+
+
+
 
 Route::pathNotFound(function () {
     $res = new Res();

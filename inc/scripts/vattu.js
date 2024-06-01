@@ -1,11 +1,10 @@
-var route = '/api/customers';
+var route = '/api/vattu';
 
 document.addEventListener("DOMContentLoaded", async function () {
   getData();
 });
 
 function getData(url = "") {
-  console.log(url);
   let links = url == "" ? route : url;
   let searchValue = document.querySelector("#searchName").value.trim();
   let params = {}
@@ -15,7 +14,6 @@ function getData(url = "") {
   axios
     .get(links,{params})
     .then((response) => {
-      console.log(response);
       if (response.data.status === 200) {
         showData(response.data.data);
       }else if(response.data.status === 403){
@@ -44,12 +42,13 @@ function insertContent(data){
       return `
           <tr>
             <td class="username align-middle white-space-nowrap text-center">${index + 1}</td>
-            <td class="username align-middle white-space-nowrap text-center"><a href="/quan-ly-nhan-vien/${item.user_id}">${item.user_name}</a></td>
+            <td class="username align-middle white-space-nowrap text-center">${item.code}</td>
             <td class="username align-middle white-space-nowrap text-center">${item.name}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.phone}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.email}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.company}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.address}</td>
+            <td class="username align-middle white-space-nowrap text-center">${formatMoney(item.price)}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.quantity}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.unit_name}</td>
+            <td class="username align-middle white-space-nowrap text-center">${setType(item.type)}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.description || 'Không'}</td>
             <td class="username align-middle white-space-nowrap text-center">${item.created_at}</td>
             <td class="align-middle white-space-nowrap text-center d-flex pe-0">
                 <div class="position-relative">
@@ -57,19 +56,12 @@ function insertContent(data){
                         <span class="fas far fa-edit"></span>
                     </button>
                 </div>
-                <div class="position-relative">
-                    <a href="/quan-ly-bao-gia/${item.id}" class="btn btn-edit-show btn-sm btn-phoenix-secondary text-info me-1 fs-10" title="Phân quyền user" type="button">
-                      $
-                    </a>
-                </div>
             </td>
           </tr>
       `;
   }).join('');
   return content;
 }
-
-
 
 let formEdit = document.querySelector("#formEdit");
 function showOne(id){
@@ -83,8 +75,7 @@ function showOne(id){
           ele.value = data[name];
         }
       }
-      document.querySelector("#user-name").value = data.user_name;
-      document.querySelector("#edit-id").value = data.id;
+      document.querySelector("#data-id").value = data.id;
     }else if(response.data.status == 403){
       showErrorMD(response.data.errorMessage);
     }
@@ -118,7 +109,8 @@ formEdit.addEventListener('submit',function(e){
       acc[item.name] = item.value;
       return acc;
     }, {});
-    let id = document.querySelector("#edit-id").value;
+    let id = document.querySelector("#data-id").value;
+    data.price = removeCommas(data.price);
     axios
       .put(`${route}/${id}`, data)
       .then((response) => {
@@ -187,9 +179,11 @@ formAdd.addEventListener('submit',function(e){
       acc[item.name] = item.value;
       return acc;
     }, {});
+    data.price = removeCommas(data.price);
     axios
       .put(route, data)
       .then((response) => {
+        console.log(response);
         if (response.data.status == 201) {
           closeAdd.click();
           showMessageMD(response.data.successMessage);
@@ -213,3 +207,23 @@ modelAdd.addEventListener("hidden.bs.modal", function (e) {
   clearAllClassValidate(formAdd);
 });
 
+
+function setType($type){
+  switch($type){
+    case 1: {
+      return "Cát";
+    }
+    case 2: {
+      return "Xi măng";
+    }
+    case 3: {
+      return "Sắt thép";
+    }
+    case 4: {
+      return "Đá";
+    }
+    case 5: {
+      return "Phụ gia";
+    }
+  }
+}

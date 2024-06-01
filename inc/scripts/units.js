@@ -1,21 +1,20 @@
-var route = '/api/customers';
+var route = '/api/units';
 
 document.addEventListener("DOMContentLoaded", async function () {
   getData();
 });
 
 function getData(url = "") {
-  console.log(url);
   let links = url == "" ? route : url;
   let searchValue = document.querySelector("#searchName").value.trim();
   let params = {}
   if(searchValue){
     params.search = searchValue;
   }
+  params.filter = document.querySelector("#filter").value;
   axios
     .get(links,{params})
     .then((response) => {
-      console.log(response);
       if (response.data.status === 200) {
         showData(response.data.data);
       }else if(response.data.status === 403){
@@ -44,23 +43,13 @@ function insertContent(data){
       return `
           <tr>
             <td class="username align-middle white-space-nowrap text-center">${index + 1}</td>
-            <td class="username align-middle white-space-nowrap text-center"><a href="/quan-ly-nhan-vien/${item.user_id}">${item.user_name}</a></td>
             <td class="username align-middle white-space-nowrap text-center">${item.name}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.phone}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.email}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.company}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.address}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.created_at}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.type == 1 ? 'Dịch vụ' : 'Sản phẩm'}</td>
             <td class="align-middle white-space-nowrap text-center d-flex pe-0">
-                <div class="position-relative">
-                    <button onclick="showOne(${item.id})" class="btn btn-edit-show btn-sm btn-phoenix-secondary text-info me-1 fs-10" title="Sửa" type="button" data-bs-toggle="modal" data-bs-target="#editModel">
+                <div class="position-relative m-auto">
+                    <button onclick="showOne(${item.id})" class="btn btn-sm btn-phoenix-secondary text-info fs-10" title="Sửa" type="button" data-bs-toggle="modal" data-bs-target="#editModel">
                         <span class="fas far fa-edit"></span>
                     </button>
-                </div>
-                <div class="position-relative">
-                    <a href="/quan-ly-bao-gia/${item.id}" class="btn btn-edit-show btn-sm btn-phoenix-secondary text-info me-1 fs-10" title="Phân quyền user" type="button">
-                      $
-                    </a>
                 </div>
             </td>
           </tr>
@@ -69,21 +58,19 @@ function insertContent(data){
   return content;
 }
 
-
-
 let formEdit = document.querySelector("#formEdit");
 function showOne(id){
   axios.get(`${route}/${id}`)
   .then((response) => {
     if (response.data.status === 200) {
       let data = response.data.data;
+      console.log(data);
       for(let name in data){
         let ele = formEdit.querySelector(`[name="${name}"]`);
         if(ele){
           ele.value = data[name];
         }
       }
-      document.querySelector("#user-name").value = data.user_name;
       document.querySelector("#edit-id").value = data.id;
     }else if(response.data.status == 403){
       showErrorMD(response.data.errorMessage);

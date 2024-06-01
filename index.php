@@ -67,24 +67,49 @@ Route::add(root_base . '/quan-ly-nha-cung-cap/cong-no/([0-9]*)', function () {
 Route::add(root_base . '/quan-ly-khach-hang', function () {
     include './pages/customers/customers.php';
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Route::add(root_base . '/test/([0-9]*)', function () {
-    $id = getLastStringUri();
-    dd($id);
+// Quản lý báo giá
+Route::add(root_base . '/quan-ly-bao-gia/([0-9]*)', function () {
+    include './pages/customers/quotes.php';
 });
+// Quản lý chi tiết báo giá
+Route::add(root_base . '/quan-ly-chi-tiet-bao-gia/([0-9]*)', function () {
+    include './pages/customers/quote_details.php';
+});
+// Bảng chi tiết báo giá
+Route::add(root_base . '/chi-tiet-bao-gia/([0-9]*)', function () {
+    include './pages/customers/quote_info.php';
+});
+
+// Quản lý loại vật tư
+Route::add(root_base . '/quan-ly-loai-vat-tu', function () {
+    include './pages/vattu/loaivattu.php';
+});
+// Quản lý loại vật tư
+Route::add(root_base . '/quan-ly-don-vi-tinh', function () {
+    include './pages/units/units.php';
+});
+
+// quản lý sản phẩm và dịch vụ
+Route::add(root_base . '/quan-ly-san-pham-dich-vu', function () {
+    include './pages/products/products.php';
+});
+
+
+// quản lý sản phẩm và dịch vụ
+Route::add(root_base . '/quan-ly-vat-tu', function () {
+    include './pages/vattu/vattu.php';
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 

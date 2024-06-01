@@ -70,6 +70,11 @@ const formatBalance = (event, number = 2) => {
     event.target.value = balance;
   }
 };
+const removeCommas = (numberString) => {
+  const cleanedString = numberString.replace(/,/g, '');
+  const number = parseInt(cleanedString, 10);
+  return number;
+};
 const handleInputBalance = (event) => {
   delayedBalanceHandler(event, 2);
 };
@@ -347,11 +352,14 @@ const confirmDelete = (url, title, getData) => {
     axios
       .delete(url)
       .then((res) => {
+        console.log(res);
         if (res.data.status == 200) {
           myModal.hide();
           getData();
           showMessageMD(res.data.successMessage);
-        } else if (res.data.errorMessage) {
+        }else if(res.data.status == 403){
+          showErrorMD(res.data.errorMessage);
+        }else if (res.data.errorMessage) {
           showErrorMD(res.data.errorMessage);
         }
         myModal.hide();

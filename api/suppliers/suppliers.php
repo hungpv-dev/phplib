@@ -74,16 +74,6 @@ if ($requestMethod == 'GET') {
         $res->exit(422, Responses::getMessage('SUPPLIERS-ERR-02'));
     }
 
-
-    $supplierAmount = (new Model('supplier_amounts'))->create([
-        'initial_advance_amount' => 0,
-        'advance_amount' => 0,
-        'initial_debt_amount' => 0,
-        'debt_amount' => 0,
-        'created_at' => $nowTime,
-        'updated_at' => $nowTime,
-    ]);
-    $dataRequest['supplier_amount_id'] = $supplierAmount->id;
     $suppliers = (new Model('suppliers'))->create($dataRequest);
 
     userActiveLog('thêm nhà cung cấp ' . $suppliers->name . '(#' . $suppliers->id . ')');

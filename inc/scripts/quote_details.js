@@ -1,12 +1,12 @@
-var route = '/api/customers';
+var route = '/api/quote_details';
+var routeDetail = '/api/quote_detail';
 
 document.addEventListener("DOMContentLoaded", async function () {
   getData();
 });
-
 function getData(url = "") {
-  console.log(url);
-  let links = url == "" ? route : url;
+  let id = document.querySelector("#data-id").value;
+  let links = url == "" ? route+`/${id}` : url;
   let searchValue = document.querySelector("#searchName").value.trim();
   let params = {}
   if(searchValue){
@@ -15,7 +15,6 @@ function getData(url = "") {
   axios
     .get(links,{params})
     .then((response) => {
-      console.log(response);
       if (response.data.status === 200) {
         showData(response.data.data);
       }else if(response.data.status === 403){
@@ -44,13 +43,12 @@ function insertContent(data){
       return `
           <tr>
             <td class="username align-middle white-space-nowrap text-center">${index + 1}</td>
-            <td class="username align-middle white-space-nowrap text-center"><a href="/quan-ly-nhan-vien/${item.user_id}">${item.user_name}</a></td>
-            <td class="username align-middle white-space-nowrap text-center">${item.name}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.phone}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.email}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.company}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.address}</td>
-            <td class="username align-middle white-space-nowrap text-center">${item.created_at}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.product_name +'(#'+item.product_id+')'}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.quantity}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.unit_name}</td>
+            <td class="username align-middle white-space-nowrap text-center">${formatMoney(item.price)}</td>
+            <td class="username align-middle white-space-nowrap text-center">${formatMoney(item.total)}</td>
+            <td class="username align-middle white-space-nowrap text-center">${item.note || 'Không'}</td>
             <td class="align-middle white-space-nowrap text-center d-flex pe-0">
                 <div class="position-relative">
                     <button onclick="showOne(${item.id})" class="btn btn-edit-show btn-sm btn-phoenix-secondary text-info me-1 fs-10" title="Sửa" type="button" data-bs-toggle="modal" data-bs-target="#editModel">
@@ -58,9 +56,9 @@ function insertContent(data){
                     </button>
                 </div>
                 <div class="position-relative">
-                    <a href="/quan-ly-bao-gia/${item.id}" class="btn btn-edit-show btn-sm btn-phoenix-secondary text-info me-1 fs-10" title="Phân quyền user" type="button">
-                      $
-                    </a>
+                    <button onclick="confirmDelete('/api/quote_detail/${item.id}','Bạn chắc chắn muốn xóa chứ',getData)" class="btn btn-sm btn-phoenix-secondary text-info fs-10" title="Xóa" type="button" data-bs-toggle="modal">
+                      <span class="nav-icons uil uil-trash"></span>
+                    </button>
                 </div>
             </td>
           </tr>
@@ -69,21 +67,20 @@ function insertContent(data){
   return content;
 }
 
-
-
 let formEdit = document.querySelector("#formEdit");
 function showOne(id){
-  axios.get(`${route}/${id}`)
+  axios.get(`${routeDetail}/${id}`)
   .then((response) => {
     if (response.data.status === 200) {
       let data = response.data.data;
+      data.price = formatMoney(data.price);
+      data.total = formatMoney(data.total);
       for(let name in data){
         let ele = formEdit.querySelector(`[name="${name}"]`);
         if(ele){
           ele.value = data[name];
         }
       }
-      document.querySelector("#user-name").value = data.user_name;
       document.querySelector("#edit-id").value = data.id;
     }else if(response.data.status == 403){
       showErrorMD(response.data.errorMessage);
@@ -119,8 +116,10 @@ formEdit.addEventListener('submit',function(e){
       return acc;
     }, {});
     let id = document.querySelector("#edit-id").value;
+    data.price = removeCommas(data.price);
+    data.total = removeCommas(data.total);
     axios
-      .put(`${route}/${id}`, data)
+      .put(`${routeDetail}/${id}`, data)
       .then((response) => {
         if (response.data.status == 200) {
           closeEdit.click();
@@ -187,9 +186,13 @@ formAdd.addEventListener('submit',function(e){
       acc[item.name] = item.value;
       return acc;
     }, {});
+    let id = document.querySelector("#data-id").value;
+    data.price = removeCommas(data.price);
+    data.total = removeCommas(data.total);
     axios
-      .put(route, data)
+      .put(route+`/${id}`, data)
       .then((response) => {
+        console.log(response);
         if (response.data.status == 201) {
           closeAdd.click();
           showMessageMD(response.data.successMessage);
@@ -213,3 +216,76 @@ modelAdd.addEventListener("hidden.bs.modal", function (e) {
   clearAllClassValidate(formAdd);
 });
 
+
+
+let changeProSer = document.querySelector("#changeProSer");
+changeProSer.addEventListener('change',function(){
+  let filter = this.value;
+  axios
+    .get('/api/products',{params:{filter,show: true}})
+    .then((response) => {
+      if (response.data.status === 200) {
+        let data = response.data.data.data;
+        let show = document.getElementById("showList");
+        let content = '<option value="" hidden>Chọn SP & DV</option>';
+        content += data.map((item) => {
+          return `
+            <option value="${item.id}">${item.name}</option>
+          `;
+        }).join('');
+        show.innerHTML = content;
+        show.disabled = false;
+      }else if(response.data.status === 403){
+        showMessageMD(response.data.errorMessage);
+      }
+    });
+});
+let showList = document.querySelector("#showList");
+showList.addEventListener('change',function(){
+  let id = this.value;
+  axios
+  .get(`/api/products/${id}`)
+  .then((response) => {
+    if (response.data.status === 200) {
+      let data = response.data.data;
+      document.getElementById("showPrice").value = formatMoney(data.price);
+      document.getElementById("showUnit").value = data.unit_id;
+      setTotal();
+    }else if(response.data.status === 403){
+      showMessageMD(response.data.errorMessage);
+    }
+  });
+});
+
+let showPrice = document.querySelector("#showPrice");
+showPrice.addEventListener('input',function(){
+  setTotal();
+});
+let showQuantity = document.querySelector("#showQuantity");
+showQuantity.addEventListener('input',function(){
+  setTotal();
+});
+
+function setTotal(){
+  let showPrice = document.getElementById("showPrice");
+  let showQuantity = document.getElementById("showQuantity");
+  let price = removeCommas(showPrice.value);
+  let total = price * showQuantity.value;
+  document.getElementById("showTotal").value = formatMoney(total);
+}
+let showPriceE = document.querySelector("#showPriceE");
+showPriceE.addEventListener('input',function(){
+  setTotalE();
+});
+let showQuantityE = document.querySelector("#showQuantityE");
+showQuantityE.addEventListener('input',function(){
+  setTotalE();
+});
+
+function setTotalE(){
+  let showPrice = document.getElementById("showPriceE");
+  let showQuantity = document.getElementById("showQuantityE");
+  let price = removeCommas(showPrice.value);
+  let total = price * showQuantity.value;
+  document.getElementById("showTotalE").value = formatMoney(total);
+}
